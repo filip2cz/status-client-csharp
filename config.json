@@ -1,0 +1,7 @@
+{
+  "server": "example.com",
+  "port": 35601,
+  "user": "user",
+  "passwd": "password",
+  "debug": false
+}

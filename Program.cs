@@ -2,16 +2,21 @@
 using System.Diagnostics;
 using System.Net.Sockets;
 using System.Text;
+using System.Text.Json;
+using Newtonsoft.Json;
 
 bool auth = false;
 string seconds;
 
 // nastavení serveru a portu (todo: dát to do config souboru
-bool debug = true;
-string server = "status.fkomarek.eu";
-int port = 35601;
-string user = "user";
-string passwd = "password";
+var configJson = File.ReadAllText("config.json");
+dynamic config = JsonConvert.DeserializeObject(configJson);
+
+string server = config.server;
+int port = config.port;
+string user = config.user;
+string passwd = config.passwd;
+bool debug = config.debug;
 
 while (true)
 {
