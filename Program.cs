@@ -1,10 +1,5 @@
-﻿using System;
-using System.Diagnostics;
-using System.IO;
-using System.Net.NetworkInformation;
-using System.Net.Sockets;
+﻿using System.Net.Sockets;
 using System.Text;
-using System.Text.Json;
 using Newtonsoft.Json;
 
 Console.WriteLine("Status client C# v0.2");
