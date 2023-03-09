@@ -8,6 +8,8 @@ using Newtonsoft.Json;
 
 bool auth = false;
 
+Console.WriteLine("Status client C# v0.1");
+
 if (File.Exists("config.json") == false)
 {
     Console.WriteLine("config.json not found, creating one");
