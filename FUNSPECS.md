@@ -21,6 +21,11 @@ Uživatel na zařízení neuvidí cokoliv z programu. Program bude určen ke spu
   
 Pokud program ztratí spojení se serverem, bude spojení obnoveno a bude znovu provedena autentizace. Pokud bude program při autentizaci odmítnut serverem, nebo se spojení neuskuteční z nějakého jiného důvodu, bude spojení restartováno v intervalu deseti sekund.
 
-## Otevřené otázky
-### Ukládání dat v konfiguračním souboru
-Zatím nebylo zcela vymyšleno, v jakém formátu budou ukládána data v konfiguračním souboru.
+Konfigurační soubor bude ve formátu JSON, kde bude 5 možností ukládání:
+- server [string]
+- port [int]
+- user [string]
+- password [string]
+- debug [bool]
+
+Soubor bude uložen ve složce se serverem jako `config.json`. Software bude při spuštění kontrolovat existenci souboru a pokud ho nenajde, vytvoří ho a ukončí se.
