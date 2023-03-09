@@ -3,6 +3,7 @@ using System.Text;
 using Newtonsoft.Json;
 
 Console.WriteLine("Status client C# v0.2");
+Console.WriteLine("by Filip Komárek");
 Console.WriteLine("Github: https://github.com/filip2cz/status-client-csharp");
 Console.WriteLine("Gitea mirror: https://git.envs.net/filip2cz/status-client-csharp");
 
