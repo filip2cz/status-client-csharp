@@ -59,7 +59,7 @@ if (pingTest)
     }
     if (debug)
     {
-        Console.WriteLine("Ping test was succefull");
+        Console.WriteLine("Ping test was successfull");
     }
     pingTries = 0;
 }
@@ -172,5 +172,5 @@ while (true)
     // disconnect
     client.Close();
     client.Dispose();
-    Console.WriteLine("Disconected");
+    Console.WriteLine("Disconnected");
 }
