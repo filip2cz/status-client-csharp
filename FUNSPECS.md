@@ -1,6 +1,6 @@
 # Funkční specifikace
 
-- verze: 0.4
+- verze: 1.0
 - datum: 5. března 2023
 - autor: Filip Komárek
 

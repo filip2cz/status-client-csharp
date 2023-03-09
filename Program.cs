@@ -6,7 +6,6 @@ using System.Text.Json;
 using Newtonsoft.Json;
 
 bool auth = false;
-string seconds;
 
 // nastavení serveru a portu (todo: dát to do config souboru
 var configJson = File.ReadAllText("config.json");
