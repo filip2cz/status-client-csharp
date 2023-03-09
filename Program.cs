@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
 using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
@@ -9,7 +10,20 @@ bool auth = false;
 
 if (File.Exists("config.json") == false)
 {
-    Console.WriteLine("config.json not found");
+    Console.WriteLine("config.json not found, creating one");
+
+    using (StreamWriter sw = File.CreateText("config.json"))
+    {
+        sw.WriteLine("{");
+        sw.WriteLine("  \"server\": \"example.com\",");
+        sw.WriteLine("  \"port\": 35601,");
+        sw.WriteLine("  \"user\": \"user\",");
+        sw.WriteLine("  \"passwd\": \"password\",");
+        sw.WriteLine("  \"debug\": false");
+        sw.WriteLine("}");
+    }
+
+
     return;
 }
 
