@@ -1,13 +1,15 @@
-﻿using System.Net.Sockets;
+﻿using System.Diagnostics;
+using System.Net.Sockets;
 using System.Text;
 using Newtonsoft.Json;
 
-Console.WriteLine("Status client C# v0.2");
+Console.WriteLine("Status client C# v0.3");
 Console.WriteLine("by Filip Komárek");
 Console.WriteLine("Github: https://github.com/filip2cz/status-client-csharp");
 Console.WriteLine("Gitea mirror: https://git.envs.net/filip2cz/status-client-csharp");
 
 bool auth = false;
+int processorCount = Environment.ProcessorCount;
 //int pingTries = 0;
 
 if (File.Exists("config.json") == false)
@@ -148,7 +150,7 @@ while (true)
         var uptimeSeconds = (long)(uptimeMilliseconds / 1000);
 
         // sending
-        string data = "update {\"online6\": false,  \"uptime\": " + uptimeSeconds.ToString() + ", \"load\": 0, \"memory_total\": 0, \"memory_used\": 0, \"swap_total\": 0, \"swap_used\": 0, \"hdd_total\": 0, \"hdd_used\": 0, \"cpu\": 0.0, \"network_rx\": 0, \"network_tx\": 0 }\r\n";
+        string data = "update {\"online6\": false,  \"uptime\": " + uptimeSeconds.ToString() + ", \"load\": -1.0, \"memory_total\": 0, \"memory_used\": 0, \"swap_total\": 0, \"swap_used\": 0, \"hdd_total\": 0, \"hdd_used\": 0, \"cpu\": 0.0, \"network_rx\": 0, \"network_tx\": 0 }\r\n";
         byte[] dataSend = Encoding.ASCII.GetBytes(data);
 
         try
