@@ -2,6 +2,7 @@
 using System.Net.Sockets;
 using System.Text;
 using Newtonsoft.Json;
+using System.Management;
 
 Console.WriteLine("Status client C# v0.3");
 Console.WriteLine("by Filip Komárek");
@@ -149,8 +150,28 @@ while (true)
         var uptimeMilliseconds = System.Environment.TickCount64;
         var uptimeSeconds = (long)(uptimeMilliseconds / 1000);
 
+        // ram
+        // https://ourcodeworld.com/articles/read/879/how-to-retrieve-the-ram-amount-available-on-the-system-in-winforms-with-c-sharp
+        ObjectQuery wql = new ObjectQuery("SELECT * FROM Win32_OperatingSystem");
+        ManagementObjectSearcher searcher = new ManagementObjectSearcher(wql);
+        ManagementObjectCollection results = searcher.Get();
+
+        List<int> memoryValues = new List<int>(); // inicializace seznamu pro ukládání výsledků
+
+        foreach (ManagementObject result in results)
+        {
+            int totalVisibleMemory = Convert.ToInt32(result["TotalVisibleMemorySize"]);
+            int freePhysicalMemory = Convert.ToInt32(result["FreePhysicalMemory"]);
+
+            memoryValues.Add(totalVisibleMemory);
+            memoryValues.Add(freePhysicalMemory);
+        }
+        int memoryTotal = memoryValues[0];
+        int memoryFree = memoryValues[1];
+        int memoryUsed = memoryTotal - memoryFree;
+
         // sending
-        string data = "update {\"online6\": false,  \"uptime\": " + uptimeSeconds.ToString() + ", \"load\": -1.0, \"memory_total\": 0, \"memory_used\": 0, \"swap_total\": 0, \"swap_used\": 0, \"hdd_total\": 0, \"hdd_used\": 0, \"cpu\": 0.0, \"network_rx\": 0, \"network_tx\": 0 }\r\n";
+        string data = "update {\"online6\": false,  \"uptime\": " + uptimeSeconds.ToString() + ", \"load\": -1.0, \"memory_total\": " + memoryTotal + ", \"memory_used\": " + memoryUsed + ", \"swap_total\": 0, \"swap_used\": 0, \"hdd_total\": 0, \"hdd_used\": 0, \"cpu\": 0.0, \"network_rx\": 0, \"network_tx\": 0 }\r\n";
         byte[] dataSend = Encoding.ASCII.GetBytes(data);
 
         try
