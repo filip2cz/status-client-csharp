@@ -156,7 +156,7 @@ while (true)
         ManagementObjectSearcher searcher = new ManagementObjectSearcher(wql);
         ManagementObjectCollection results = searcher.Get();
 
-        List<int> memoryValues = new List<int>(); // inicializace seznamu pro ukládání výsledků
+        List<int> memoryValues = new List<int>(); // inicialization of list for results
 
         foreach (ManagementObject result in results)
         {
