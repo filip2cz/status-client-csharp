@@ -4,7 +4,7 @@ using System.Text;
 using Newtonsoft.Json;
 using System.Management;
 
-Console.WriteLine("Status client C# v0.3");
+Console.WriteLine("Status client C# v0.4");
 Console.WriteLine("by Filip Komárek");
 Console.WriteLine("Github: https://github.com/filip2cz/status-client-csharp");
 Console.WriteLine("Gitea mirror: https://git.envs.net/filip2cz/status-client-csharp");
@@ -170,8 +170,19 @@ while (true)
         int memoryFree = memoryValues[1];
         int memoryUsed = memoryTotal - memoryFree;
 
+        // CPU
+        int cpuUsage = 0;
+
+        // HDD
+        DriveInfo driveC = new DriveInfo("C");
+        long totalSizeInBytes = driveC.TotalSize;
+        long freeSpaceInBytes = driveC.TotalFreeSpace;
+
+        int totalSize = (int)(totalSizeInBytes / 1024 / 1024);
+        long usedSpace = totalSizeInBytes - freeSpaceInBytes;
+
         // sending
-        string data = "update {\"online6\": false,  \"uptime\": " + uptimeSeconds.ToString() + ", \"load\": -1.0, \"memory_total\": " + memoryTotal + ", \"memory_used\": " + memoryUsed + ", \"swap_total\": 0, \"swap_used\": 0, \"hdd_total\": 0, \"hdd_used\": 0, \"cpu\": 0.0, \"network_rx\": 0, \"network_tx\": 0 }\r\n";
+        string data = "update {\"online6\": false,  \"uptime\": " + uptimeSeconds.ToString() + ", \"load\": -1.0, \"memory_total\": " + memoryTotal + ", \"memory_used\": " + memoryUsed + ", \"swap_total\": 0, \"swap_used\": 0, \"hdd_total\": " + totalSize + ", \"hdd_used\": " + usedSpace / 1024 / 1024 + ", \"cpu\": " + cpuUsage / 1024 / 1024 / 1024 + ", \"network_rx\": 0, \"network_tx\": 0 }\r\n";
         byte[] dataSend = Encoding.ASCII.GetBytes(data);
 
         try
