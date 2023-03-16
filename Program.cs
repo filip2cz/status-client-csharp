@@ -200,7 +200,7 @@ while (true)
         }
         else
         {
-            ipv6 = "true";
+            ipv6 = "false";
         }
 
         // sending
