@@ -3,14 +3,17 @@ using System.Net.Sockets;
 using System.Text;
 using Newtonsoft.Json;
 using System.Management;
+using System.Net.NetworkInformation;
+using System.Net;
 
-Console.WriteLine("Status client C# v0.4");
+Console.WriteLine("Status client C# v0.5");
 Console.WriteLine("by Filip Komárek");
 Console.WriteLine("Github: https://github.com/filip2cz/status-client-csharp");
 Console.WriteLine("Gitea mirror: https://git.envs.net/filip2cz/status-client-csharp");
 
 bool auth = false;
 int processorCount = Environment.ProcessorCount;
+string ipv6;
 //int pingTries = 0;
 
 if (File.Exists("config.json") == false)
@@ -146,11 +149,11 @@ while (true)
     // sending
     while (client.Connected)
     {
-        // uptime
+        // Uptime
         var uptimeMilliseconds = System.Environment.TickCount64;
         var uptimeSeconds = (long)(uptimeMilliseconds / 1000);
 
-        // ram
+        // RAM + Swap
         // https://ourcodeworld.com/articles/read/879/how-to-retrieve-the-ram-amount-available-on-the-system-in-winforms-with-c-sharp
         ObjectQuery wql = new ObjectQuery("SELECT * FROM Win32_OperatingSystem");
         ManagementObjectSearcher searcher = new ManagementObjectSearcher(wql);
@@ -162,13 +165,22 @@ while (true)
         {
             int totalVisibleMemory = Convert.ToInt32(result["TotalVisibleMemorySize"]);
             int freePhysicalMemory = Convert.ToInt32(result["FreePhysicalMemory"]);
+            int totalVirtualMemory = Convert.ToInt32(result["TotalVirtualMemorySize"]);
+            int freeVirtualMemory = Convert.ToInt32(result["FreeVirtualMemory"]);
 
             memoryValues.Add(totalVisibleMemory);
             memoryValues.Add(freePhysicalMemory);
+            memoryValues.Add(totalVirtualMemory);
+            memoryValues.Add(freeVirtualMemory);
         }
+        
         int memoryTotal = memoryValues[0];
         int memoryFree = memoryValues[1];
         int memoryUsed = memoryTotal - memoryFree;
+
+        int swapTotal = memoryValues[2];
+        int swapFree = memoryValues[3];
+        int swapUsed = swapTotal - swapFree;
 
         // CPU
         int cpuUsage = 0;
@@ -181,8 +193,18 @@ while (true)
         int totalSize = (int)(totalSizeInBytes / 1024 / 1024);
         long usedSpace = totalSizeInBytes - freeSpaceInBytes;
 
+        // IPv6
+        if (CheckIPv6Support())
+        {
+            ipv6 = "true";
+        }
+        else
+        {
+            ipv6 = "true";
+        }
+
         // sending
-        string data = "update {\"online6\": false,  \"uptime\": " + uptimeSeconds.ToString() + ", \"load\": -1.0, \"memory_total\": " + memoryTotal + ", \"memory_used\": " + memoryUsed + ", \"swap_total\": 0, \"swap_used\": 0, \"hdd_total\": " + totalSize + ", \"hdd_used\": " + usedSpace / 1024 / 1024 + ", \"cpu\": " + cpuUsage / 1024 / 1024 / 1024 + ", \"network_rx\": 0, \"network_tx\": 0 }\r\n";
+        string data = "update {\"online6\": " + ipv6 + ",  \"uptime\": " + uptimeSeconds.ToString() + ", \"load\": -1.0, \"memory_total\": " + memoryTotal + ", \"memory_used\": " + memoryUsed + ", \"swap_total\": " + swapTotal + ", \"swap_used\": " + swapUsed + ", \"hdd_total\": " + totalSize + ", \"hdd_used\": " + usedSpace / 1024 / 1024 + ", \"cpu\": " + cpuUsage + ", \"network_rx\": 0, \"network_tx\": 0 }\r\n";
         byte[] dataSend = Encoding.ASCII.GetBytes(data);
 
         try
@@ -208,4 +230,17 @@ while (true)
     client.Close();
     client.Dispose();
     Console.WriteLine("Disconnected");
+}
+static bool CheckIPv6Support()
+{
+    try
+    {
+        Ping ping = new Ping();
+        PingReply reply = ping.Send("ipv6.google.com");
+        return (reply.Status == IPStatus.Success);
+    }
+    catch
+    {
+        return false;
+    }
 }
