@@ -59,8 +59,8 @@ int adapterIndex = int.Parse(Console.ReadLine()) - 1;
 
 var adapter = adapterList[adapterIndex];
 
-bytesSentCounter = new PerformanceCounter("Network Interface", "Bytes Sent/sec", adapter.Name, true);
-bytesReceivedCounter = new PerformanceCounter("Network Interface", "Bytes Received/sec", adapter.Name, true);
+//bytesSentCounter = new PerformanceCounter("Network Interface", "Bytes Sent/sec", adapter.Name, true);
+//bytesReceivedCounter = new PerformanceCounter("Network Interface", "Bytes Received/sec", adapter.Name, true);
 
 // test if server is avaible with ping
 /*
@@ -221,15 +221,15 @@ while (true)
         }
 
         // Network
-        var monitor = new NetworkTrafficMonitor();
-        monitor.StartMonitoring();
+        //var monitor = new NetworkTrafficMonitor();
+        //monitor.StartMonitoring();
 
-        Console.WriteLine(monitor.BytesSent);
-        Console.WriteLine(monitor.BytesReceived);
-        Console.WriteLine(  );
+        //Console.WriteLine(monitor.BytesSent);
+        //Console.WriteLine(monitor.BytesReceived);
+        //Console.WriteLine(  );
 
         // sending
-        string data = "update {\"online6\": " + ipv6 + ",  \"uptime\": " + uptimeSeconds.ToString() + ", \"load\": -1.0, \"memory_total\": " + memoryTotal + ", \"memory_used\": " + memoryUsed + ", \"swap_total\": " + swapTotal + ", \"swap_used\": " + swapUsed + ", \"hdd_total\": " + totalSize + ", \"hdd_used\": " + usedSpace / 1024 / 1024 + ", \"cpu\": " + cpuUsage + ".0, \"network_rx\": " + monitor.BytesSent + ", \"network_tx\": " + monitor.BytesReceived + " }\r\n";
+        string data = "update {\"online6\": " + ipv6 + ",  \"uptime\": " + uptimeSeconds.ToString() + ", \"load\": -1.0, \"memory_total\": " + memoryTotal + ", \"memory_used\": " + memoryUsed + ", \"swap_total\": " + swapTotal + ", \"swap_used\": " + swapUsed + ", \"hdd_total\": " + totalSize + ", \"hdd_used\": " + usedSpace / 1024 / 1024 + ", \"cpu\": " + cpuUsage + ".0, \"network_rx\": " + 0 + ", \"network_tx\": " + 0 + " }\r\n";
         byte[] dataSend = Encoding.ASCII.GetBytes(data);
 
         try
