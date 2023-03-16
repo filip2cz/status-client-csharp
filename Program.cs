@@ -183,7 +183,6 @@ while (true)
 
         // CPU
         int cpuUsage = (int)GetCpuUsage(2000); // This method contains sleep so that it is not sent every like 2 milliseconds. If you edit this, be sure to uncomment the other sleep below
-        Console.WriteLine(cpuUsage);
 
         // HDD
         DriveInfo driveC = new DriveInfo("C");
