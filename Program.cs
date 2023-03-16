@@ -4,7 +4,6 @@ using System.Text;
 using Newtonsoft.Json;
 using System.Management;
 using System.Net.NetworkInformation;
-using System.Net;
 
 Console.WriteLine("Status client C# v0.5");
 Console.WriteLine("by Filip Komárek");
@@ -247,7 +246,6 @@ static bool CheckIPv6Support()
 }
 
 // thanks GPT-3 for this code
-
 double GetCpuUsage(double interval)
 {
     PerformanceCounter cpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
