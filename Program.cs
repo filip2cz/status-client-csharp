@@ -183,7 +183,8 @@ while (true)
         int swapUsed = swapTotal - swapFree;
 
         // CPU
-        int cpuUsage = 0;
+        int cpuUsage = (int)GetCpuUsage(2000); // This method contains sleep so that it is not sent every like 2 milliseconds. If you edit this, be sure to uncomment the other sleep below
+        Console.WriteLine(cpuUsage);
 
         // HDD
         DriveInfo driveC = new DriveInfo("C");
@@ -204,7 +205,7 @@ while (true)
         }
 
         // sending
-        string data = "update {\"online6\": " + ipv6 + ",  \"uptime\": " + uptimeSeconds.ToString() + ", \"load\": -1.0, \"memory_total\": " + memoryTotal + ", \"memory_used\": " + memoryUsed + ", \"swap_total\": " + swapTotal + ", \"swap_used\": " + swapUsed + ", \"hdd_total\": " + totalSize + ", \"hdd_used\": " + usedSpace / 1024 / 1024 + ", \"cpu\": " + cpuUsage + ", \"network_rx\": 0, \"network_tx\": 0 }\r\n";
+        string data = "update {\"online6\": " + ipv6 + ",  \"uptime\": " + uptimeSeconds.ToString() + ", \"load\": -1.0, \"memory_total\": " + memoryTotal + ", \"memory_used\": " + memoryUsed + ", \"swap_total\": " + swapTotal + ", \"swap_used\": " + swapUsed + ", \"hdd_total\": " + totalSize + ", \"hdd_used\": " + usedSpace / 1024 / 1024 + ", \"cpu\": " + cpuUsage + ".0, \"network_rx\": 0, \"network_tx\": 0 }\r\n";
         byte[] dataSend = Encoding.ASCII.GetBytes(data);
 
         try
@@ -223,7 +224,7 @@ while (true)
         {
             Console.WriteLine(data);
         }
-        Thread.Sleep(3000);
+        //Thread.Sleep(3000);
     }
 
     // disconnect
@@ -243,4 +244,14 @@ static bool CheckIPv6Support()
     {
         return false;
     }
+}
+
+// thanks GPT-3 for this code
+
+double GetCpuUsage(double interval)
+{
+    PerformanceCounter cpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
+    cpuCounter.NextValue();
+    System.Threading.Thread.Sleep((int)interval);
+    return cpuCounter.NextValue();
 }
