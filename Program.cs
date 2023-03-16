@@ -246,6 +246,8 @@ static bool CheckIPv6Support()
 }
 
 // thanks GPT-3 for this code
+// I love you, bro
+// https://chat.openai.com/
 double GetCpuUsage(double interval)
 {
     PerformanceCounter cpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
