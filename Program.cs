@@ -4,6 +4,8 @@ using System.Text;
 using Newtonsoft.Json;
 using System.Management;
 using System.Net.NetworkInformation;
+using System.Collections.Generic;
+using System.Linq;
 
 Console.WriteLine("Status client C# v0.5");
 Console.WriteLine("by Filip Komárek");
@@ -43,6 +45,22 @@ string user = config.user;
 string passwd = config.passwd;
 bool debug = config.debug;
 //bool pingTest = config.pingtest;
+
+// network adapter
+var adapterList = NetworkInterface.GetAllNetworkInterfaces();
+
+for (int i = 0; i < adapterList.Length; i++)
+{
+    Console.WriteLine("{0} - {1}", i + 1, adapterList[i].Name);
+}
+
+Console.Write("Choose network adapter (1-{0}): ", adapterList.Length);
+int adapterIndex = int.Parse(Console.ReadLine()) - 1;
+
+var adapter = adapterList[adapterIndex];
+
+bytesSentCounter = new PerformanceCounter("Network Interface", "Bytes Sent/sec", adapter.Name, true);
+bytesReceivedCounter = new PerformanceCounter("Network Interface", "Bytes Received/sec", adapter.Name, true);
 
 // test if server is avaible with ping
 /*
@@ -202,8 +220,16 @@ while (true)
             ipv6 = "false";
         }
 
+        // Network
+        var monitor = new NetworkTrafficMonitor();
+        monitor.StartMonitoring();
+
+        Console.WriteLine(monitor.BytesSent);
+        Console.WriteLine(monitor.BytesReceived);
+        Console.WriteLine(  );
+
         // sending
-        string data = "update {\"online6\": " + ipv6 + ",  \"uptime\": " + uptimeSeconds.ToString() + ", \"load\": -1.0, \"memory_total\": " + memoryTotal + ", \"memory_used\": " + memoryUsed + ", \"swap_total\": " + swapTotal + ", \"swap_used\": " + swapUsed + ", \"hdd_total\": " + totalSize + ", \"hdd_used\": " + usedSpace / 1024 / 1024 + ", \"cpu\": " + cpuUsage + ".0, \"network_rx\": 0, \"network_tx\": 0 }\r\n";
+        string data = "update {\"online6\": " + ipv6 + ",  \"uptime\": " + uptimeSeconds.ToString() + ", \"load\": -1.0, \"memory_total\": " + memoryTotal + ", \"memory_used\": " + memoryUsed + ", \"swap_total\": " + swapTotal + ", \"swap_used\": " + swapUsed + ", \"hdd_total\": " + totalSize + ", \"hdd_used\": " + usedSpace / 1024 / 1024 + ", \"cpu\": " + cpuUsage + ".0, \"network_rx\": " + monitor.BytesSent + ", \"network_tx\": " + monitor.BytesReceived + " }\r\n";
         byte[] dataSend = Encoding.ASCII.GetBytes(data);
 
         try
@@ -252,4 +278,35 @@ double GetCpuUsage(double interval)
     cpuCounter.NextValue();
     System.Threading.Thread.Sleep((int)interval);
     return cpuCounter.NextValue();
+}
+class NetworkTrafficMonitor
+{
+    private PerformanceCounter bytesSentCounter;
+    private PerformanceCounter bytesReceivedCounter;
+
+    public long BytesSent { get; private set; }
+    public long BytesReceived { get; private set; }
+
+    public NetworkTrafficMonitor()
+    {
+        bytesSentCounter = new PerformanceCounter("Network Interface", "Bytes Sent/sec", true);
+        bytesReceivedCounter = new PerformanceCounter("Network Interface", "Bytes Received/sec", true);
+    }
+
+    public void StartMonitoring()
+    {
+        Console.WriteLine("Monitoring network traffic...");
+        while (true)
+        {
+            var bytesSent = bytesSentCounter.NextValue();
+            var bytesReceived = bytesReceivedCounter.NextValue();
+
+            BytesSent += (long)bytesSent;
+            BytesReceived += (long)bytesReceived;
+
+            Console.WriteLine("Bytes sent: {0}/s, Bytes received: {1}/s", bytesSent, bytesReceived);
+
+            Thread.Sleep(1000);
+        }
+    }
 }
