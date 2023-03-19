@@ -49,6 +49,8 @@ bool debug = config.debug;
 // network adapter
 var adapterList = NetworkInterface.GetAllNetworkInterfaces();
 
+/*
+
 for (int i = 0; i < adapterList.Length; i++)
 {
     Console.WriteLine("{0} - {1}", i + 1, adapterList[i].Name);
@@ -58,6 +60,8 @@ Console.Write("Choose network adapter (1-{0}): ", adapterList.Length);
 int adapterIndex = int.Parse(Console.ReadLine()) - 1;
 
 var adapter = adapterList[adapterIndex];
+
+*/
 
 //bytesSentCounter = new PerformanceCounter("Network Interface", "Bytes Sent/sec", adapter.Name, true);
 //bytesReceivedCounter = new PerformanceCounter("Network Interface", "Bytes Received/sec", adapter.Name, true);
