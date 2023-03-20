@@ -7,7 +7,7 @@ using System.Net.NetworkInformation;
 using System.Collections.Generic;
 using System.Linq;
 
-Console.WriteLine("Status client C# v0.5");
+Console.WriteLine("Status client C# v1.0");
 Console.WriteLine("by Filip Komárek");
 Console.WriteLine("Github: https://github.com/filip2cz/status-client-csharp");
 Console.WriteLine("Gitea mirror: https://git.envs.net/filip2cz/status-client-csharp");
@@ -45,26 +45,6 @@ string user = config.user;
 string passwd = config.passwd;
 bool debug = config.debug;
 //bool pingTest = config.pingtest;
-
-// network adapter
-var adapterList = NetworkInterface.GetAllNetworkInterfaces();
-
-/*
-
-for (int i = 0; i < adapterList.Length; i++)
-{
-    Console.WriteLine("{0} - {1}", i + 1, adapterList[i].Name);
-}
-
-Console.Write("Choose network adapter (1-{0}): ", adapterList.Length);
-int adapterIndex = int.Parse(Console.ReadLine()) - 1;
-
-var adapter = adapterList[adapterIndex];
-
-*/
-
-//bytesSentCounter = new PerformanceCounter("Network Interface", "Bytes Sent/sec", adapter.Name, true);
-//bytesReceivedCounter = new PerformanceCounter("Network Interface", "Bytes Received/sec", adapter.Name, true);
 
 // test if server is avaible with ping
 /*
@@ -170,6 +150,24 @@ while (true)
     // sending
     while (client.Connected)
     {
+        // network rx and tx
+        // https://stackoverflow.com/questions/2081827/c-sharp-get-system-network-usage
+        NetworkInterface[] interfaces
+            = NetworkInterface.GetAllNetworkInterfaces();
+
+        int network_rx = 0;
+        int network_tx = 0;
+
+        foreach (NetworkInterface ni in interfaces)
+        {
+            network_rx = network_rx + (int)ni.GetIPv4Statistics().BytesReceived;
+            network_tx = network_tx + (int)ni.GetIPv4Statistics().BytesSent;
+        }
+
+        Console.WriteLine(network_rx);
+        Console.WriteLine(network_tx);
+        Console.WriteLine();
+        
         // Uptime
         var uptimeMilliseconds = System.Environment.TickCount64;
         var uptimeSeconds = (long)(uptimeMilliseconds / 1000);
@@ -233,7 +231,7 @@ while (true)
         //Console.WriteLine(  );
 
         // sending
-        string data = "update {\"online6\": " + ipv6 + ",  \"uptime\": " + uptimeSeconds.ToString() + ", \"load\": -1.0, \"memory_total\": " + memoryTotal + ", \"memory_used\": " + memoryUsed + ", \"swap_total\": " + swapTotal + ", \"swap_used\": " + swapUsed + ", \"hdd_total\": " + totalSize + ", \"hdd_used\": " + usedSpace / 1024 / 1024 + ", \"cpu\": " + cpuUsage + ".0, \"network_rx\": " + 0 + ", \"network_tx\": " + 0 + " }\r\n";
+        string data = "update {\"online6\": " + ipv6 + ",  \"uptime\": " + uptimeSeconds.ToString() + ", \"load\": -1.0, \"memory_total\": " + memoryTotal + ", \"memory_used\": " + memoryUsed + ", \"swap_total\": " + swapTotal + ", \"swap_used\": " + swapUsed + ", \"hdd_total\": " + totalSize + ", \"hdd_used\": " + usedSpace / 1024 / 1024 + ", \"cpu\": " + cpuUsage + ".0, \"network_rx\": " + network_rx / 1024 + ", \"network_tx\": " + network_tx / 1024 + " }\r\n";
         byte[] dataSend = Encoding.ASCII.GetBytes(data);
 
         try
