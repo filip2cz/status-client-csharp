@@ -1,7 +1,7 @@
 # Status client for Windows
 https://github.com/BotoX/ServerStatus client implementation in C# for Windows
 
-[![wakatime](https://wakatime.com/badge/github/filip2cz/status-client-csharp.svg?7)](https://wakatime.com/badge/github/filip2cz/status-client-csharp)
+[![wakatime](https://wakatime.com/badge/github/filip2cz/status-client-csharp.svg?8)](https://wakatime.com/badge/github/filip2cz/status-client-csharp)
 
 ## Installation
 

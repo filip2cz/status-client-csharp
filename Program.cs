@@ -160,8 +160,8 @@ while (true)
 
         foreach (NetworkInterface ni in interfaces)
         {
-            network_rx = network_rx + (int)ni.GetIPv4Statistics().BytesReceived;
-            network_tx = network_tx + (int)ni.GetIPv4Statistics().BytesSent;
+            network_rx = (int)ni.GetIPv4Statistics().BytesReceived;
+            network_tx = (int)ni.GetIPv4Statistics().BytesSent;
         }
 
         Console.WriteLine(network_rx);
@@ -281,6 +281,7 @@ double GetCpuUsage(double interval)
     System.Threading.Thread.Sleep((int)interval);
     return cpuCounter.NextValue();
 }
+/*
 class NetworkTrafficMonitor
 {
     private PerformanceCounter bytesSentCounter;
@@ -303,8 +304,8 @@ class NetworkTrafficMonitor
             var bytesSent = bytesSentCounter.NextValue();
             var bytesReceived = bytesReceivedCounter.NextValue();
 
-            BytesSent = (long)bytesSent;
-            BytesReceived = (long)bytesReceived;
+            BytesSent += (long)bytesSent;
+            BytesReceived += (long)bytesReceived;
 
             //Console.WriteLine("Bytes sent: {0}/s, Bytes received: {1}/s", bytesSent, bytesReceived);
 
@@ -312,3 +313,4 @@ class NetworkTrafficMonitor
         }
     }
 }
+*/
