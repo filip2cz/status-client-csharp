@@ -303,10 +303,10 @@ class NetworkTrafficMonitor
             var bytesSent = bytesSentCounter.NextValue();
             var bytesReceived = bytesReceivedCounter.NextValue();
 
-            BytesSent += (long)bytesSent;
-            BytesReceived += (long)bytesReceived;
+            BytesSent = (long)bytesSent;
+            BytesReceived = (long)bytesReceived;
 
-            Console.WriteLine("Bytes sent: {0}/s, Bytes received: {1}/s", bytesSent, bytesReceived);
+            //Console.WriteLine("Bytes sent: {0}/s, Bytes received: {1}/s", bytesSent, bytesReceived);
 
             Thread.Sleep(1000);
         }
