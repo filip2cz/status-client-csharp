@@ -91,7 +91,7 @@ while (true)
     TcpClient client = new TcpClient();
 
     if (debug)
-    {   
+    {
         Console.WriteLine("Connecting to server...");
     }
 
@@ -112,7 +112,7 @@ while (true)
             auth = false;
         }
     }
-    
+
     Console.WriteLine("Connected");
 
     // get stream for data sending
@@ -167,7 +167,7 @@ while (true)
         Console.WriteLine(network_rx);
         Console.WriteLine(network_tx);
         Console.WriteLine();
-        
+
         // Uptime
         var uptimeMilliseconds = System.Environment.TickCount64;
         var uptimeSeconds = (long)(uptimeMilliseconds / 1000);
@@ -192,7 +192,7 @@ while (true)
             memoryValues.Add(totalVirtualMemory);
             memoryValues.Add(freeVirtualMemory);
         }
-        
+
         int memoryTotal = memoryValues[0];
         int memoryFree = memoryValues[1];
         int memoryUsed = memoryTotal - memoryFree;
