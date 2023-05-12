@@ -6,11 +6,20 @@ https://github.com/BotoX/ServerStatus client implementation in C# for Windows
 ## Installation
 
 ### Package manager - [Scoop](https://scoop.sh)
-`scoop install https://github.com/filip2cz/status-client-csharp/raw/main/pkg/scoop/status-client-csharp.json`, you can run it with `status-client-csharp`, conf files are in `$HOME/scoop/apps/status-client-csharp/current/`
+`scoop install https://github.com/filip2cz/status-client-csharp/raw/main/pkg/scoop/status-client-csharp.json`, you can run it with `status-client-csharp`
 
+### Installer
+Download and run installer from github [releases](https://github.com/filip2cz/status-client-csharp/releases)
+
+### Portable
+Download .zip file from [releases](https://github.com/filip2cz/status-client-csharp/releases) and unzip it wherever you want.
+
+## Autorun
 You can create something like service in Task Scheduler, where you should create new task and propably choose "run at startup", if you want to run it automatically after computer reboot.
 
 ## Configuration
+
+##### Config files are in the folder where you execute it!
 Configuration is in config.json file.
 
 example config file:
