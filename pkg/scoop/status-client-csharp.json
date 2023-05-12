@@ -1,6 +1,8 @@
 {
-    "version": "0.3",
-    "url": "https://github.com/filip2cz/status-client-csharp/releases/download/v0.3/status_client_csharp_v0-3.zip",
+    "version": "1.0",
+    "description": "C# client for Status from BotoX",
+    "homepage": "https://github.com/filip2cz/status-client-csharp",
+    "url": "https://github.com/filip2cz/status-client-csharp/releases/download/v1.0/status_client_csharp_v1-0.zip",
     "extract_dir": "status-client-csharp",
     "bin": "status-client-csharp.exe"
 }
