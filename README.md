@@ -6,6 +6,7 @@ https://github.com/BotoX/ServerStatus client implementation in C# for Windows
 ## Installation
 
 ### Package manager - [Scoop](https://scoop.sh)
+´scoop install 
 
 You can create something like service in Task Scheduler, where you should create new task and propably choose "run at startup", if you want to run it automatically after computer reboot.
 
