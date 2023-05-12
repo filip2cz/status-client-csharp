@@ -3,6 +3,7 @@
     "description": "C# client for Status from BotoX",
     "homepage": "https://github.com/filip2cz/status-client-csharp",
     "license": "https://raw.githubusercontent.com/filip2cz/status-client-csharp/main/LICENSE",
+    "bin": "status-client-csharp.exe",
     "extract_dir": "status-client-csharp",
     "notes": "",
     "architecture": {
