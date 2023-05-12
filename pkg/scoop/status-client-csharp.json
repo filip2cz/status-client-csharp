@@ -1,8 +1,10 @@
 {
-    "version": "0.5",
+    "version": "v0.5",
     "description": "C# client for Status from BotoX",
     "homepage": "https://github.com/filip2cz/status-client-csharp",
-    "checkver": "github",
+    "checkver": {
+        "url": "https://github.com/git-for-windows/git/releases/latest"
+    },
     "license": "https://raw.githubusercontent.com/filip2cz/status-client-csharp/main/LICENSE",
     "bin": "status-client-csharp.exe",
     "extract_dir": "status-client-csharp",
@@ -16,7 +18,7 @@
     "autoupdate": {
         "architecture": {
             "64bit": {
-                "url": "https://github.com/filip2cz/status-client-csharp/releases/download/v$version/status_client_csharp_v$version.zip",
+                "url": "https://github.com/filip2cz/status-client-csharp/releases/download/$version/status_client_csharp_$version.zip",
                 "hash": {
                     "url": "https://raw.githubusercontent.com/filip2cz/status-client-csharp/main/pkg/scoop/status-client-csharp.sha256"
                 }
