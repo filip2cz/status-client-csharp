@@ -18,7 +18,7 @@
             "64bit": {
                 "url": "https://github.com/filip2cz/status-client-csharp/releases/download/v$version/status_client_csharp_v$version.zip",
                 "hash": {
-                    "url": "https://qemu.weilnetz.de/w64/qemu-w64-setup-$matchYear$matchMonth$matchDay.sha512"
+                    "url": "https://raw.githubusercontent.com/filip2cz/status-client-csharp/main/pkg/scoop/status-client-csharp.sha256"
                 }
             }
         }
