@@ -1,5 +1,5 @@
 {
-    "version": "0.2",
+    "version": "0.3",
     "url": "https://github.com/filip2cz/status-client-csharp/releases/download/v0.1/status_client_csharp_v0-1.zip",
     "extract_dir": "status-client-csharp",
     "bin": "status-client-csharp.exe"
