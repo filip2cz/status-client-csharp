@@ -12,12 +12,9 @@ Tento dokument popisuje účel, způsob fungování a základní požadavky toho
 Pro vývojáře a uživatele software
 
 ## Kontakty
-Email: filip@fkomarek.eu 
+Email: filip@fkomarek.eu  
 Telegram: filip2cz   
 Discord: Filip2cz#9069  
-Briar: briar://aamrpy64lwwqpfnoq67lmattpu5o52ykxef37p7ddmpufodv7xzro  
-Session: 05f242e0cac979bb65e19cf5edc9a1e3af85f6547436cfc9100c0486d543ee923b  
-Delta Chat: delta@fkomarek.eu  
 Mastodon: @filip2cz@mastodon.arch-linux.cz  
 Instagram: @filip2czprivate  
 SINET: hyper -> 9385 -> 2000
