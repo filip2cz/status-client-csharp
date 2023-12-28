@@ -1,8 +1,0 @@
-{
-  "hostname": "askUser",
-  "username": "askUser",
-  "firstCommandDescription": "This is first command",
-  "firstCommand": "echo First Command",
-  "secondCommandDescription": "This is second command",
-  "secondCommand": "echo Second Command"
-}
