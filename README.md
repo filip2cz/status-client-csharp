@@ -6,7 +6,13 @@ https://github.com/BotoX/ServerStatus client implementation in C# for Windows
 ## Installation
 
 ### Package manager - [Scoop](https://scoop.sh)
-`scoop install https://github.com/filip2cz/status-client-csharp/raw/main/pkg/scoop/status-client-csharp.json`, you can run it with `status-client-csharp`
+```
+scoop bucket add henshouse https://github.com/henshouse/henshouse-scoop
+
+scoop install henshouse/status-client-csharp
+```
+Now 
+you can run it with `status-client-csharp`
 
 ### Installer
 Download and run installer from github [releases](https://github.com/filip2cz/status-client-csharp/releases)
