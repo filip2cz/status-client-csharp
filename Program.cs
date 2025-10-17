@@ -4,10 +4,12 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Text;
-using System.Threading.Tasks;
 using System.Threading;
+using System.Threading.Tasks;
+using System.Management;
 
 namespace status_client_csharp
 {
@@ -69,7 +71,26 @@ namespace status_client_csharp
                 Debug.WriteLine($"Server output: {Encoding.ASCII.GetString(buffer, 0, bytesRead)}");
                 Console.WriteLine(Encoding.ASCII.GetString(buffer, 0, bytesRead));
 
-                Thread.Sleep(10000);
+                while (client.Connected)
+                {
+                    string data = "update {\"online6\": " + CheckIPv6Support() + ",  \"uptime\": " + GetUptime() + ", \"load\": -1.0, \"memory_total\": " + "0" + ", \"memory_used\": " + "0" + ", \"swap_total\": " + "0" + ", \"swap_used\": " + "0" + ", \"hdd_total\": " + "1" + ", \"hdd_used\": " + "0" + ", \"cpu\": " + "0" + ".0, \"network_rx\": " + "0" + ", \"network_tx\": " + "0" + " }\r\n";
+                    Debug.WriteLine($"Main(): data = {data}");
+                    byte[] dataSend = Encoding.ASCII.GetBytes(data);
+                    try
+                    {
+                        NetworkStream stream = client.GetStream();
+                        stream.Write(dataSend, 0, dataSend.Length);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine("Connection refused: " + ex.Message);
+                    }
+                    Thread.Sleep(3000);
+                }
+
+                Console.WriteLine("Client disconnected, connecting again");
+                Debug.WriteLine("Main(): Client disconnected, connecting again");
+                Thread.Sleep(1000);
             }
         }
         static string CheckConfig()
@@ -109,6 +130,28 @@ namespace status_client_csharp
             var configJson = File.ReadAllText(configPath);
             dynamic config = JsonConvert.DeserializeObject(configJson);
             return config;
+        }
+        static string CheckIPv6Support()
+        {
+            try
+            {
+                Ping ping = new Ping();
+                PingReply reply = ping.Send("ipv6.google.com");
+                Debug.WriteLine($"CheckIPv6Support(): {reply.Status == IPStatus.Success}");
+                return Convert.ToString(reply.Status == IPStatus.Success);
+            }
+            catch
+            {
+                Debug.WriteLine($"CheckIPv6Support(): false");
+                return "false";
+            }
+        }
+        static string GetUptime()
+        {
+            var uptimeMilliseconds = System.Environment.TickCount;
+            var uptimeSeconds = (long)(uptimeMilliseconds / 1000);
+            Debug.WriteLine($"GetUptime(): uptimeSeconds = {uptimeSeconds}");
+            return uptimeSeconds.ToString();
         }
     }
 }
