@@ -73,7 +73,9 @@ namespace status_client_csharp
 
                 while (client.Connected)
                 {
-                    string data = "update {\"online6\": " + CheckIPv6Support() + ",  \"uptime\": " + GetUptime() + ", \"load\": -1.0, \"memory_total\": " + "0" + ", \"memory_used\": " + "0" + ", \"swap_total\": " + "0" + ", \"swap_used\": " + "0" + ", \"hdd_total\": " + "1" + ", \"hdd_used\": " + "0" + ", \"cpu\": " + "0" + ".0, \"network_rx\": " + "0" + ", \"network_tx\": " + "0" + " }\r\n";
+                    var memory = GetMemoryInfo();
+
+                    string data = "update {\"online6\": " + CheckIPv6Support() + ",  \"uptime\": " + GetUptime() + ", \"load\": -1.0, \"memory_total\": " + memory.ramTotal + ", \"memory_used\": " + (memory.ramTotal - memory.ramFree) + ", \"swap_total\": " + memory.swapTotal + ", \"swap_used\": " + (memory.swapTotal - memory.swapFree) + ", \"hdd_total\": " + "1" + ", \"hdd_used\": " + "0" + ", \"cpu\": " + "0" + ".0, \"network_rx\": " + "0" + ", \"network_tx\": " + "0" + " }\r\n";
                     Debug.WriteLine($"Main(): data = {data}");
                     byte[] dataSend = Encoding.ASCII.GetBytes(data);
                     try
@@ -152,6 +154,39 @@ namespace status_client_csharp
             var uptimeSeconds = (long)(uptimeMilliseconds / 1000);
             Debug.WriteLine($"GetUptime(): uptimeSeconds = {uptimeSeconds}");
             return uptimeSeconds.ToString();
+        }
+        static dynamic GetMemoryInfo()
+        {
+            // RAM + Swap
+            // https://ourcodeworld.com/articles/read/879/how-to-retrieve-the-ram-amount-available-on-the-system-in-winforms-with-c-sharp
+            ObjectQuery wql = new ObjectQuery("SELECT * FROM Win32_OperatingSystem");
+            ManagementObjectSearcher searcher = new ManagementObjectSearcher(wql);
+            ManagementObjectCollection results = searcher.Get();
+
+            List<int> memoryValues = new List<int>(); // inicialization of list for results
+
+            foreach (ManagementObject result in results)
+            {
+                int totalVisibleMemory = Convert.ToInt32(result["TotalVisibleMemorySize"]);
+                int freePhysicalMemory = Convert.ToInt32(result["FreePhysicalMemory"]);
+                int totalVirtualMemory = Convert.ToInt32(result["TotalVirtualMemorySize"]);
+                int freeVirtualMemory = Convert.ToInt32(result["FreeVirtualMemory"]);
+
+                memoryValues.Add(totalVisibleMemory);
+                memoryValues.Add(freePhysicalMemory);
+                memoryValues.Add(totalVirtualMemory);
+                memoryValues.Add(freeVirtualMemory);
+            }
+
+            var memory = new
+            {
+                ramTotal = memoryValues[0],
+                ramFree = memoryValues[1],
+                swapTotal = memoryValues[2],
+                swapFree = memoryValues[3]
+            };
+
+            return memory;
         }
     }
 }
