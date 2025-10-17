@@ -74,8 +74,9 @@ namespace status_client_csharp
                 while (client.Connected)
                 {
                     var memory = GetMemoryInfo();
+                    var hdd = GetHddInfo();
 
-                    string data = "update {\"online6\": " + CheckIPv6Support() + ",  \"uptime\": " + GetUptime() + ", \"load\": -1.0, \"memory_total\": " + memory.ramTotal + ", \"memory_used\": " + (memory.ramTotal - memory.ramFree) + ", \"swap_total\": " + memory.swapTotal + ", \"swap_used\": " + (memory.swapTotal - memory.swapFree) + ", \"hdd_total\": " + "1" + ", \"hdd_used\": " + "0" + ", \"cpu\": " + "0" + ".0, \"network_rx\": " + "0" + ", \"network_tx\": " + "0" + " }\r\n";
+                    string data = "update {\"online6\": " + CheckIPv6Support() + ",  \"uptime\": " + GetUptime() + ", \"load\": -1.0, \"memory_total\": " + memory.ramTotal + ", \"memory_used\": " + (memory.ramTotal - memory.ramFree) + ", \"swap_total\": " + memory.swapTotal + ", \"swap_used\": " + (memory.swapTotal - memory.swapFree) + ", \"hdd_total\": " + hdd.total + ", \"hdd_used\": " + hdd.used + ", \"cpu\": " + "0" + ".0, \"network_rx\": " + "0" + ", \"network_tx\": " + "0" + " }\r\n";
                     Debug.WriteLine($"Main(): data = {data}");
                     byte[] dataSend = Encoding.ASCII.GetBytes(data);
                     try
@@ -187,6 +188,16 @@ namespace status_client_csharp
             };
 
             return memory;
+        }
+        static dynamic GetHddInfo()
+        {
+            DriveInfo driveC = new DriveInfo("C");
+            var hdd = new
+            {
+                total = driveC.TotalSize / 1024 / 1024,
+                used = (driveC.TotalSize - driveC.TotalFreeSpace) / 1024 / 1024
+            };
+            return hdd;
         }
     }
 }
