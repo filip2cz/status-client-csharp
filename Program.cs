@@ -75,8 +75,9 @@ namespace status_client_csharp
                 {
                     var memory = GetMemoryInfo();
                     var hdd = GetHddInfo();
+                    var network = GetNetworkUsage();
 
-                    string data = "update {\"online6\": " + CheckIPv6Support() + ",  \"uptime\": " + GetUptime() + ", \"load\": -1.0, \"memory_total\": " + memory.ramTotal + ", \"memory_used\": " + (memory.ramTotal - memory.ramFree) + ", \"swap_total\": " + memory.swapTotal + ", \"swap_used\": " + (memory.swapTotal - memory.swapFree) + ", \"hdd_total\": " + hdd.total + ", \"hdd_used\": " + hdd.used + ", \"cpu\": " + GetCpuUsage() + ".0, \"network_rx\": " + "0" + ", \"network_tx\": " + "0" + " }\r\n";
+                    string data = "update {\"online6\": " + CheckIPv6Support() + ",  \"uptime\": " + GetUptime() + ", \"load\": -1.0, \"memory_total\": " + memory.ramTotal + ", \"memory_used\": " + (memory.ramTotal - memory.ramFree) + ", \"swap_total\": " + memory.swapTotal + ", \"swap_used\": " + (memory.swapTotal - memory.swapFree) + ", \"hdd_total\": " + hdd.total + ", \"hdd_used\": " + hdd.used + ", \"cpu\": " + GetCpuUsage() + ".0, \"network_rx\": " + network.rx + ", \"network_tx\": " + network.tx + " }\r\n";
                     Debug.WriteLine($"Main(): data = {data}");
                     byte[] dataSend = Encoding.ASCII.GetBytes(data);
                     try
@@ -206,8 +207,31 @@ namespace status_client_csharp
             // https://chat.openai.com/
             PerformanceCounter cpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
             cpuCounter.NextValue();
-            System.Threading.Thread.Sleep((int)3000); // sleep so this works
+            System.Threading.Thread.Sleep((int)2000); // sleep so this works
             return (int)cpuCounter.NextValue();
+        }
+        static dynamic GetNetworkUsage()
+        {
+            // network rx and tx
+            // https://stackoverflow.com/questions/2081827/c-sharp-get-system-network-usage
+            NetworkInterface[] interfaces = NetworkInterface.GetAllNetworkInterfaces();
+
+            int network_rx = 0;
+            int network_tx = 0;
+
+            foreach (NetworkInterface ni in interfaces)
+            {
+                network_rx = (int)ni.GetIPv4Statistics().BytesReceived;
+                network_tx = (int)ni.GetIPv4Statistics().BytesSent;
+            }
+
+            var network = new
+            {
+                rx = network_rx / 1024,
+                tx = network_tx / 1024
+            };
+
+            return network;
         }
     }
 }
