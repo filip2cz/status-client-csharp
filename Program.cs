@@ -76,7 +76,7 @@ namespace status_client_csharp
                     var memory = GetMemoryInfo();
                     var hdd = GetHddInfo();
 
-                    string data = "update {\"online6\": " + CheckIPv6Support() + ",  \"uptime\": " + GetUptime() + ", \"load\": -1.0, \"memory_total\": " + memory.ramTotal + ", \"memory_used\": " + (memory.ramTotal - memory.ramFree) + ", \"swap_total\": " + memory.swapTotal + ", \"swap_used\": " + (memory.swapTotal - memory.swapFree) + ", \"hdd_total\": " + hdd.total + ", \"hdd_used\": " + hdd.used + ", \"cpu\": " + "0" + ".0, \"network_rx\": " + "0" + ", \"network_tx\": " + "0" + " }\r\n";
+                    string data = "update {\"online6\": " + CheckIPv6Support() + ",  \"uptime\": " + GetUptime() + ", \"load\": -1.0, \"memory_total\": " + memory.ramTotal + ", \"memory_used\": " + (memory.ramTotal - memory.ramFree) + ", \"swap_total\": " + memory.swapTotal + ", \"swap_used\": " + (memory.swapTotal - memory.swapFree) + ", \"hdd_total\": " + hdd.total + ", \"hdd_used\": " + hdd.used + ", \"cpu\": " + GetCpuUsage() + ".0, \"network_rx\": " + "0" + ", \"network_tx\": " + "0" + " }\r\n";
                     Debug.WriteLine($"Main(): data = {data}");
                     byte[] dataSend = Encoding.ASCII.GetBytes(data);
                     try
@@ -88,7 +88,8 @@ namespace status_client_csharp
                     {
                         Console.WriteLine("Connection refused: " + ex.Message);
                     }
-                    Thread.Sleep(3000);
+                    // Thread.Sleep(3000);
+                    // GetCpuUsage has sleep in it
                 }
 
                 Console.WriteLine("Client disconnected, connecting again");
@@ -198,6 +199,15 @@ namespace status_client_csharp
                 used = (driveC.TotalSize - driveC.TotalFreeSpace) / 1024 / 1024
             };
             return hdd;
+        }
+        static int GetCpuUsage()
+        {
+            // thanks GPT-3 for this code
+            // https://chat.openai.com/
+            PerformanceCounter cpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
+            cpuCounter.NextValue();
+            System.Threading.Thread.Sleep((int)3000); // sleep so this works
+            return (int)cpuCounter.NextValue();
         }
     }
 }
