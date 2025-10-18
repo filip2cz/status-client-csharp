@@ -1,9 +1,10 @@
 ﻿using Newtonsoft.Json;
 using System.Diagnostics;
+using System.Management;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
+using System.Runtime.InteropServices;
 using System.Text;
-using System.Management;
 
 string configPath = CheckConfig();
 Console.WriteLine($"Loading config found at {configPath}, loading it.");
@@ -66,7 +67,7 @@ while (true)
         var network = GetNetworkUsage();
 
         string data = "update {\"online6\": " + CheckIPv6Support() + ",  \"uptime\": " + GetUptime() + ", \"load\": -1.0, \"memory_total\": " + memory.ramTotal + ", \"memory_used\": " + (memory.ramTotal - memory.ramFree) + ", \"swap_total\": " + memory.swapTotal + ", \"swap_used\": " + (memory.swapTotal - memory.swapFree) + ", \"hdd_total\": " + hdd.total + ", \"hdd_used\": " + hdd.used + ", \"cpu\": " + GetCpuUsage() + ".0, \"network_rx\": " + network.rx + ", \"network_tx\": " + network.tx + " }\r\n";
-        Debug.WriteLine($"Main(): data = {data}");
+        Console.WriteLine($"Main(): data = {data}");
         byte[] dataSend = Encoding.ASCII.GetBytes(data);
         try
         {
@@ -89,8 +90,20 @@ static string CheckConfig()
 {
     if (File.Exists("config.json") == true)
     {
-        Debug.WriteLine($"CheckConfig(): Config found at {Environment.CurrentDirectory}\\config.json");
-        return $"{Environment.CurrentDirectory}\\config.json";
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            Debug.WriteLine($"CheckConfig(): Config found at {Environment.CurrentDirectory}\\config.json");
+            return $"{Environment.CurrentDirectory}\\config.json";
+        }
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            Debug.WriteLine($"CheckConfig(): Config found at {Environment.CurrentDirectory}/config.json");
+            return $"{Environment.CurrentDirectory}/config.json";
+        }
+        else
+        {
+            return "";
+        }
     }
     else if (File.Exists($"{AppContext.BaseDirectory}\\config.json") == true)
     {
@@ -130,7 +143,14 @@ static string CheckIPv6Support()
         Ping ping = new Ping();
         PingReply reply = ping.Send("ipv6.google.com");
         Debug.WriteLine($"CheckIPv6Support(): {reply.Status == IPStatus.Success}");
-        return Convert.ToString(reply.Status == IPStatus.Success);
+        if (reply.Status == IPStatus.Success)
+        {
+            return "true";
+        }
+        else
+        {
+            return "false";
+        }
     }
     catch
     {
@@ -147,55 +167,155 @@ static string GetUptime()
 }
 static dynamic GetMemoryInfo()
 {
-    // RAM + Swap
-    // https://ourcodeworld.com/articles/read/879/how-to-retrieve-the-ram-amount-available-on-the-system-in-winforms-with-c-sharp
-    ObjectQuery wql = new ObjectQuery("SELECT * FROM Win32_OperatingSystem");
-    ManagementObjectSearcher searcher = new ManagementObjectSearcher(wql);
-    ManagementObjectCollection results = searcher.Get();
-
-    List<int> memoryValues = new List<int>(); // inicialization of list for results
-
-    foreach (ManagementObject result in results)
+    if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
     {
-        int totalVisibleMemory = Convert.ToInt32(result["TotalVisibleMemorySize"]);
-        int freePhysicalMemory = Convert.ToInt32(result["FreePhysicalMemory"]);
-        int totalVirtualMemory = Convert.ToInt32(result["TotalVirtualMemorySize"]);
-        int freeVirtualMemory = Convert.ToInt32(result["FreeVirtualMemory"]);
+        // RAM + Swap
+        // https://ourcodeworld.com/articles/read/879/how-to-retrieve-the-ram-amount-available-on-the-system-in-winforms-with-c-sharp
+        ObjectQuery wql = new ObjectQuery("SELECT * FROM Win32_OperatingSystem");
+        ManagementObjectSearcher searcher = new ManagementObjectSearcher(wql);
+        ManagementObjectCollection results = searcher.Get();
 
-        memoryValues.Add(totalVisibleMemory);
-        memoryValues.Add(freePhysicalMemory);
-        memoryValues.Add(totalVirtualMemory);
-        memoryValues.Add(freeVirtualMemory);
+        List<int> memoryValues = new List<int>(); // inicialization of list for results
+
+        foreach (ManagementObject result in results)
+        {
+            int totalVisibleMemory = Convert.ToInt32(result["TotalVisibleMemorySize"]);
+            int freePhysicalMemory = Convert.ToInt32(result["FreePhysicalMemory"]);
+            int totalVirtualMemory = Convert.ToInt32(result["TotalVirtualMemorySize"]);
+            int freeVirtualMemory = Convert.ToInt32(result["FreeVirtualMemory"]);
+
+            memoryValues.Add(totalVisibleMemory);
+            memoryValues.Add(freePhysicalMemory);
+            memoryValues.Add(totalVirtualMemory);
+            memoryValues.Add(freeVirtualMemory);
+        }
+
+        var memory = new
+        {
+            ramTotal = memoryValues[0],
+            ramFree = memoryValues[1],
+            swapTotal = memoryValues[2],
+            swapFree = memoryValues[3]
+        };
+
+        return memory;
     }
-
-    var memory = new
+    // thanks GPT-5 for this code
+    // https://chatgpt.com/
+    else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
     {
-        ramTotal = memoryValues[0],
-        ramFree = memoryValues[1],
-        swapTotal = memoryValues[2],
-        swapFree = memoryValues[3]
-    };
+        double totalMem = 0, freeMem = 0, swapTotal = 0, swapFree = 0;
+        foreach (var line in File.ReadAllLines("/proc/meminfo"))
+        {
+            if (line.StartsWith("MemTotal:")) totalMem = ParseKb(line);
+            else if (line.StartsWith("MemAvailable:")) freeMem = ParseKb(line);
+            else if (line.StartsWith("SwapTotal:")) swapTotal = ParseKb(line);
+            else if (line.StartsWith("SwapFree:")) swapFree = ParseKb(line);
+        }
 
-    return memory;
+        var memory = new
+        {
+            ramTotal = (int)totalMem,
+            ramFree = (int)freeMem,
+            swapTotal = (int)swapTotal,
+            swapFree = (int)swapFree
+        };
+
+        return memory;
+    }
+    else
+    {
+        return "";
+    }
+}
+// thanks GPT-5 for this code
+// https://chatgpt.com/
+static double ParseKb(string line)
+{
+    var parts = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+    return double.Parse(parts[1]);
 }
 static dynamic GetHddInfo()
 {
-    DriveInfo driveC = new DriveInfo("C");
-    var hdd = new
+    if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
     {
-        total = driveC.TotalSize / 1024 / 1024,
-        used = (driveC.TotalSize - driveC.TotalFreeSpace) / 1024 / 1024
-    };
-    return hdd;
+        DriveInfo driveC = new DriveInfo("C");
+        var hdd = new
+        {
+            total = driveC.TotalSize / 1024 / 1024,
+            used = (driveC.TotalSize - driveC.TotalFreeSpace) / 1024 / 1024
+        };
+        return hdd;
+    }
+    else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+    {
+        string path = "/";
+
+        DriveInfo drive = new DriveInfo(path);
+
+        var hdd = new
+        {
+            total = (int)(drive.TotalSize / 1024 / 1024),
+            used = (int)((drive.TotalSize - drive.AvailableFreeSpace) / 1024 / 1024)
+        };
+        return hdd;
+    }
+    else
+    {
+        var hdd = new
+        {
+            total = 0,
+            used = 0
+        };
+        return hdd;
+    }
 }
 static int GetCpuUsage()
 {
-    // thanks GPT-3 for this code
-    // https://chat.openai.com/
-    PerformanceCounter cpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
-    cpuCounter.NextValue();
-    System.Threading.Thread.Sleep((int)2000); // sleep so this works
-    return (int)cpuCounter.NextValue();
+    if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+    {
+        // thanks GPT-3 for this code
+        // https://chat.openai.com/
+        PerformanceCounter cpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
+        cpuCounter.NextValue();
+        Thread.Sleep(2000); // sleep so this works
+        return (int)cpuCounter.NextValue();
+    }
+    // thanks GPT-5 for this code
+    // https://chatgpt.com/
+    else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+    {
+        var cpu1 = File.ReadAllText("/proc/stat").Split("\n")[0];
+        var parts1 = cpu1.Split(" ", StringSplitOptions.RemoveEmptyEntries);
+        ulong user1 = ulong.Parse(parts1[1]);
+        ulong nice1 = ulong.Parse(parts1[2]);
+        ulong system1 = ulong.Parse(parts1[3]);
+        ulong idle1 = ulong.Parse(parts1[4]);
+
+        Thread.Sleep(2000);
+
+        var cpu2 = File.ReadAllText("/proc/stat").Split("\n")[0];
+        var parts2 = cpu2.Split(" ", StringSplitOptions.RemoveEmptyEntries);
+        ulong user2 = ulong.Parse(parts2[1]);
+        ulong nice2 = ulong.Parse(parts2[2]);
+        ulong system2 = ulong.Parse(parts2[3]);
+        ulong idle2 = ulong.Parse(parts2[4]);
+
+        ulong total1 = user1 + nice1 + system1 + idle1;
+        ulong total2 = user2 + nice2 + system2 + idle2;
+
+        ulong totalDelta = total2 - total1;
+        ulong idleDelta = idle2 - idle1;
+
+        double cpuUsage = (double)(totalDelta - idleDelta) / totalDelta * 100;
+
+        return (int)cpuUsage;
+    }
+    else
+    {
+        Thread.Sleep(2000);
+        return -1;
+    }
 }
 static dynamic GetNetworkUsage()
 {
