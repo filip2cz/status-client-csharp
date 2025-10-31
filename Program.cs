@@ -141,7 +141,7 @@ static dynamic LoadConfig(string configPath)
 static string CheckIPv4Support()
 {
     // Thanks Gemini Pro 2.5 for help with this code:
-    // chat: 
+    // chat: https://gemini.google.com/share/226a136aade7
     try
     {
         using (var client = new TcpClient())
@@ -189,7 +189,7 @@ static string CheckIPv4Support()
 static string CheckIPv6Support()
 {
     // Thanks Gemini Pro 2.5 for help with this code:
-    // chat: 
+    // chat: https://gemini.google.com/share/226a136aade7
     try
     {
         using (var client = new TcpClient())
