@@ -182,7 +182,7 @@ static string CheckIPv4Support()
     catch (Exception ex)
     {
         // Obecná chyba, např. DNS nemohlo přeložit adresu
-        Debug.WriteLine($"CheckInternetConnection: Obecná chyba: {ex.Message}");
+        Debug.WriteLine($"CheckIPv4Support(): {ex.Message}");
         return "false";
     }
 }
@@ -230,7 +230,7 @@ static string CheckIPv6Support()
     catch (Exception ex)
     {
         // Obecná chyba, např. DNS nemohlo přeložit adresu
-        Debug.WriteLine($"CheckInternetConnection: Obecná chyba: {ex.Message}");
+        Debug.WriteLine($"CheckIPv6Support(): {ex.Message}");
         return "false";
     }
 }
