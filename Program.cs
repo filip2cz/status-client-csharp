@@ -325,16 +325,51 @@ static dynamic GetHddInfo()
     }
     else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
     {
-        string path = "/";
-
-        DriveInfo drive = new DriveInfo(path);
-
-        var hdd = new
+        // Thanks Gemini 2.5 Pro for help with this code
+        // Chat: https://gemini.google.com/share/6ae86a2823eb
+        var hdd = (total: 0L, used: 0L);
+        try
         {
-            total = (int)(drive.TotalSize / 1024 / 1024),
-            used = (int)((drive.TotalSize - drive.AvailableFreeSpace) / 1024 / 1024)
+            // Získáme všechny připojené disky (mount pointy)
+            DriveInfo[] allDrives = DriveInfo.GetDrives();
+
+            foreach (var drive in allDrives)
+            {
+                // Musíme zkontrolovat, zda je disk připraven (připojen a přístupný)
+                // Jinak by volání TotalSize atd. selhalo (např. u prázdné čtečky CD)
+                if (drive.IsReady)
+                {
+                    // Celková velikost disku v bajtech
+                    long totalSize = drive.TotalSize;
+            
+                    // Celkové volné místo na disku v bajtech
+                    // (Existuje i 'AvailableFreeSpace', které zohledňuje uživatelské kvóty)
+                    long totalFreeSpace = drive.TotalFreeSpace;
+            
+                    // Použité místo musíme vypočítat
+                    long usedSpace = totalSize - totalFreeSpace;
+
+                    hdd.total += (long)totalSize;
+                    hdd.used += (long)usedSpace;
+
+                }
+            }
+        }
+        catch (IOException ex)
+        {
+            Debug.WriteLine($"Došlo k chybě při čtení informací o disku: {ex.Message}");
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            Debug.WriteLine($"Nedostatečná oprávnění pro přístup k informacím o disku: {ex.Message}");
+        }
+        
+        var hddResult = new
+        {
+            total = hdd.total / 8 / 1024 / 1024,
+            used = hdd.used / 8 / 1024 / 1024
         };
-        return hdd;
+        return hddResult;
     }
     else
     {
