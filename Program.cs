@@ -69,7 +69,7 @@ while (true)
         dynamic network = networkMonitor.GetNetworkUsage();
 
         string data = "update {\"online4\": " + CheckIPv4Support() + ",  \"online6\": " + CheckIPv6Support() + ",  \"uptime\": " + GetUptime() + ", \"load\": -1.0, \"memory_total\": " + memory.ramTotal + ", \"memory_used\": " + (memory.ramTotal - memory.ramFree) + ", \"swap_total\": " + memory.swapTotal + ", \"swap_used\": " + (memory.swapTotal - memory.swapFree) + ", \"hdd_total\": " + hdd.total + ", \"hdd_used\": " + hdd.used + ", \"cpu\": " + GetCpuUsage() + ".0, \"network_rx\": " + network.rx + ", \"network_tx\": " + network.tx + " }\r\n";
-        Console.WriteLine($"Main(): data = {data}");
+        Debug.WriteLine($"Main(): data = {data}");
         byte[] dataSend = Encoding.ASCII.GetBytes(data);
         try
         {
