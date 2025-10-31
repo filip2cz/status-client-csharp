@@ -476,8 +476,8 @@ public class NetworkUsageMonitor
         // Vytvoření a vrácení objektu v požadovaném formátu
         var network = new
         {
-            rx = receivedBytesPerSecond*8,
-            tx = sentBytesPerSecond*8
+            rx = receivedBytesPerSecond,
+            tx = sentBytesPerSecond
         };
 
         return network;
