@@ -140,45 +140,97 @@ static dynamic LoadConfig(string configPath)
 }
 static string CheckIPv4Support()
 {
+    // Thanks Gemini Pro 2.5 for help with this code:
+    // chat: 
     try
     {
-        Ping ping = new Ping();
-        PingReply reply = ping.Send("ipv4.google.com");
-        Debug.WriteLine($"CheckIPv4Support(): {reply.Status == IPStatus.Success}");
-        if (reply.Status == IPStatus.Success)
+        using (var client = new TcpClient())
         {
-            return "true";
-        }
-        else
-        {
-            return "false";
+            // 1. Zahájíme pokus o připojení
+            IAsyncResult ar = client.BeginConnect("ipv4.google.com", 80, null, null);
+
+            // 2. Synchronně čekáme na dokončení, ALE s časovým limitem
+            //    Metoda WaitOne blokuje aktuální vlákno, dokud není úkol
+            //    hotový, nebo dokud nevyprší časový limit.
+            if (ar.AsyncWaitHandle.WaitOne(TimeSpan.FromSeconds(3)))
+            {
+                // Připojení se stihlo v limitu (buď úspěšně, nebo s chybou)
+                try
+                {
+                    // 3. Ukončíme připojení. Pokud selhalo, vyhodí výjimku.
+                    client.EndConnect(ar);
+                    Debug.WriteLine($"CheckIPv4Support(): success");
+                    return "true";
+                }
+                catch (Exception ex)
+                {
+                    // Nepodařilo se připojit (např. port je zavřený)
+                    Debug.WriteLine($"CheckIPv4Support(): failed: {ex.Message}");
+                    return "false";
+                }
+            }
+            else
+            {
+                // 4. Vypršel časový limit (3 sekundy)
+                //    WaitOne vrátil 'false'
+                Debug.WriteLine($"CheckIPv4Support(): Timeout");
+                client.Close(); // Ukončíme pokus o připojení na pozadí
+                return "false";
+            }
         }
     }
-    catch
+    catch (Exception ex)
     {
-        Debug.WriteLine($"CheckIPv4Support(): false");
+        // Obecná chyba, např. DNS nemohlo přeložit adresu
+        Debug.WriteLine($"CheckInternetConnection: Obecná chyba: {ex.Message}");
         return "false";
     }
 }
 static string CheckIPv6Support()
 {
+    // Thanks Gemini Pro 2.5 for help with this code:
+    // chat: 
     try
     {
-        Ping ping = new Ping();
-        PingReply reply = ping.Send("ipv6.google.com");
-        Debug.WriteLine($"CheckIPv6Support(): {reply.Status == IPStatus.Success}");
-        if (reply.Status == IPStatus.Success)
+        using (var client = new TcpClient())
         {
-            return "true";
-        }
-        else
-        {
-            return "false";
+            // 1. Zahájíme pokus o připojení
+            IAsyncResult ar = client.BeginConnect("ipv6.google.com", 80, null, null);
+
+            // 2. Synchronně čekáme na dokončení, ALE s časovým limitem
+            //    Metoda WaitOne blokuje aktuální vlákno, dokud není úkol
+            //    hotový, nebo dokud nevyprší časový limit.
+            if (ar.AsyncWaitHandle.WaitOne(TimeSpan.FromSeconds(3)))
+            {
+                // Připojení se stihlo v limitu (buď úspěšně, nebo s chybou)
+                try
+                {
+                    // 3. Ukončíme připojení. Pokud selhalo, vyhodí výjimku.
+                    client.EndConnect(ar);
+                    Debug.WriteLine($"CheckIPv6Support(): success");
+                    return "true";
+                }
+                catch (Exception ex)
+                {
+                    // Nepodařilo se připojit (např. port je zavřený)
+                    Debug.WriteLine($"CheckIPv6Support(): failed: {ex.Message}");
+                    return "false";
+                }
+            }
+            else
+            {
+                // 4. Vypršel časový limit (3 sekundy)
+                //    WaitOne vrátil 'false'
+                Debug.WriteLine($"CheckIPv6Support(): Timeout");
+                client.Close(); // Ukončíme pokus o připojení na pozadí
+                return "false";
+            }
         }
     }
-    catch
+    catch (Exception ex)
     {
-        Debug.WriteLine($"CheckIPv6Support(): false");
+        // Obecná chyba, např. DNS nemohlo přeložit adresu
+        Debug.WriteLine($"CheckInternetConnection: Obecná chyba: {ex.Message}");
         return "false";
     }
 }
