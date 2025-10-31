@@ -68,7 +68,7 @@ while (true)
         var hdd = GetHddInfo();
         dynamic network = networkMonitor.GetNetworkUsage();
 
-        string data = "update {\"online6\": " + CheckIPv6Support() + ",  \"uptime\": " + GetUptime() + ", \"load\": -1.0, \"memory_total\": " + memory.ramTotal + ", \"memory_used\": " + (memory.ramTotal - memory.ramFree) + ", \"swap_total\": " + memory.swapTotal + ", \"swap_used\": " + (memory.swapTotal - memory.swapFree) + ", \"hdd_total\": " + hdd.total + ", \"hdd_used\": " + hdd.used + ", \"cpu\": " + GetCpuUsage() + ".0, \"network_rx\": " + network.rx + ", \"network_tx\": " + network.tx + " }\r\n";
+        string data = "update {\"online4\": " + CheckIPv4Support() + ",  \"online6\": " + CheckIPv6Support() + ",  \"uptime\": " + GetUptime() + ", \"load\": -1.0, \"memory_total\": " + memory.ramTotal + ", \"memory_used\": " + (memory.ramTotal - memory.ramFree) + ", \"swap_total\": " + memory.swapTotal + ", \"swap_used\": " + (memory.swapTotal - memory.swapFree) + ", \"hdd_total\": " + hdd.total + ", \"hdd_used\": " + hdd.used + ", \"cpu\": " + GetCpuUsage() + ".0, \"network_rx\": " + network.rx + ", \"network_tx\": " + network.tx + " }\r\n";
         Console.WriteLine($"Main(): data = {data}");
         byte[] dataSend = Encoding.ASCII.GetBytes(data);
         try
@@ -137,6 +137,28 @@ static dynamic LoadConfig(string configPath)
     var configJson = File.ReadAllText(configPath);
     dynamic config = JsonConvert.DeserializeObject(configJson);
     return config;
+}
+static string CheckIPv4Support()
+{
+    try
+    {
+        Ping ping = new Ping();
+        PingReply reply = ping.Send("ipv4.google.com");
+        Debug.WriteLine($"CheckIPv4Support(): {reply.Status == IPStatus.Success}");
+        if (reply.Status == IPStatus.Success)
+        {
+            return "true";
+        }
+        else
+        {
+            return "false";
+        }
+    }
+    catch
+    {
+        Debug.WriteLine($"CheckIPv4Support(): false");
+        return "false";
+    }
 }
 static string CheckIPv6Support()
 {
