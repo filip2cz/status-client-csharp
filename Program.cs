@@ -10,6 +10,8 @@ string configPath = CheckConfig();
 Console.WriteLine($"Loading config found at {configPath}, loading it.");
 dynamic config = LoadConfig(configPath);
 
+var networkMonitor = new NetworkUsageMonitor();
+
 Debug.WriteLine("Main(): Loaded config:");
 Debug.WriteLine($"config.server = {config.server}");
 Debug.WriteLine($"config.port = {config.port}");
@@ -64,7 +66,7 @@ while (true)
     {
         var memory = GetMemoryInfo();
         var hdd = GetHddInfo();
-        var network = GetNetworkUsage();
+        dynamic network = networkMonitor.GetNetworkUsage();
 
         string data = "update {\"online6\": " + CheckIPv6Support() + ",  \"uptime\": " + GetUptime() + ", \"load\": -1.0, \"memory_total\": " + memory.ramTotal + ", \"memory_used\": " + (memory.ramTotal - memory.ramFree) + ", \"swap_total\": " + memory.swapTotal + ", \"swap_used\": " + (memory.swapTotal - memory.swapFree) + ", \"hdd_total\": " + hdd.total + ", \"hdd_used\": " + hdd.used + ", \"cpu\": " + GetCpuUsage() + ".0, \"network_rx\": " + network.rx + ", \"network_tx\": " + network.tx + " }\r\n";
         Console.WriteLine($"Main(): data = {data}");
@@ -317,26 +319,79 @@ static int GetCpuUsage()
         return -1;
     }
 }
-static dynamic GetNetworkUsage()
+
+// Thanks Gemini 2.5 Pro for this code
+// link to chat: https://gemini.google.com/share/ca7be26d35f7
+public class NetworkUsageMonitor
 {
-    // network rx and tx
-    // https://stackoverflow.com/questions/2081827/c-sharp-get-system-network-usage
-    NetworkInterface[] interfaces = NetworkInterface.GetAllNetworkInterfaces();
+    private long lastSent;
+    private long lastReceived;
+    private DateTime lastCheckTime;
 
-    int network_rx = 0;
-    int network_tx = 0;
-
-    foreach (NetworkInterface ni in interfaces)
+    public NetworkUsageMonitor()
     {
-        network_rx = (int)ni.GetIPv4Statistics().BytesReceived;
-        network_tx = (int)ni.GetIPv4Statistics().BytesSent;
+        // Získáme počáteční stav při vytvoření instance
+        (lastSent, lastReceived) = GetTotalNetworkBytes();
+        lastCheckTime = DateTime.Now;
     }
 
-    var network = new
+    /// <summary>
+    /// Zjistí aktuální rychlost sítě od posledního volání.
+    /// Vrací anonymní objekt s BAJTY za sekundu.
+    /// </summary>
+    /// <returns>
+    /// Anonymní objekt ve formátu: new { rx = (double)příjem_B/s, tx = (double)odesílání_B/s }
+    /// </returns>
+    public object GetNetworkUsage()
     {
-        rx = network_rx / 1024,
-        tx = network_tx / 1024
-    };
+        var (currentSent, currentReceived) = GetTotalNetworkBytes();
+        var currentTime = DateTime.Now;
 
-    return network;
+        double elapsedSeconds = (currentTime - lastCheckTime).TotalSeconds;
+
+        // Zabráníme dělení nulou při příliš rychlých voláních
+        if (elapsedSeconds < 0.01)
+        {
+            return new { rx = (double)0, tx = (double)0 };
+        }
+
+        // Výpočet rychlosti v Bajtech/s
+        int sentBytesPerSecond = (int)((currentSent - lastSent) / elapsedSeconds);
+        int receivedBytesPerSecond = (int)((currentReceived - lastReceived) / elapsedSeconds);
+
+        // Uložení aktuálních hodnot pro příští volání
+        lastSent = currentSent;
+        lastReceived = currentReceived;
+        lastCheckTime = currentTime;
+
+        // Vytvoření a vrácení objektu v požadovaném formátu
+        var network = new
+        {
+            rx = receivedBytesPerSecond*8,
+            tx = sentBytesPerSecond*8
+        };
+
+        return network;
+    }
+
+    /// <summary>
+    /// Interní funkce pro sečtení statistik ze všech aktivních adaptérů.
+    /// </summary>
+    private static (long totalSent, long totalReceived) GetTotalNetworkBytes()
+    {
+        long totalBytesSent = 0;
+        long totalBytesReceived = 0;
+
+        foreach (var nic in NetworkInterface.GetAllNetworkInterfaces())
+        {
+            if (nic.OperationalStatus == OperationalStatus.Up &&
+                nic.NetworkInterfaceType != NetworkInterfaceType.Loopback)
+            {
+                var stats = nic.GetIPStatistics();
+                totalBytesSent += stats.BytesSent;
+                totalBytesReceived += stats.BytesReceived;
+            }
+        }
+        return (totalBytesSent, totalBytesReceived);
+    }
 }
